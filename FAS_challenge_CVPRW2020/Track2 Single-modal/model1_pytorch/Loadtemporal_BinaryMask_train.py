@@ -164,11 +164,12 @@ class ToTensor(object):
 
 class Spoofing_train(Dataset):
 
-    def __init__(self, info_list, type,  transform=None):
+    def __init__(self, info_list, type_,  transform=None):
 
 #        self.landmarks_frame = pd.read_csv(info_list, delimiter=' ', header=None)
         self.transform = transform
-        if type == 'train':
+        self.type_ = type_
+        if type_ == 'train':
             self.dataset = DataLmdb("/kaggle/working/Fake/train", db_size=87690, crop_size=128, flip=False, scale=1.0)
         else:
             self.dataset = DataLmdb("/kaggle/working/Fake/valid", db_size=28332, crop_size=128, flip=False, scale=1.0)
@@ -188,7 +189,8 @@ class Spoofing_train(Dataset):
             spoofing_label = 1            # real
         else:
             spoofing_label = 0            # fake
-            binary_mask = np.zeros((32, 32))    
+            if self.type_ == 'train':
+                binary_mask = np.zeros((32, 32))    
         
         
         #frequency_label = self.landmarks_frame.iloc[idx, 2:2+50].values  

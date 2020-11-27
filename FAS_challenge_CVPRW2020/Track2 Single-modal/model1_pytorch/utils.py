@@ -255,6 +255,9 @@ def performances_SiW_EER(map_score_val_filename):
     for line in lines:
         count += 1
         tokens = line.split()
+        if tokens[0] == 'nan':
+            continue
+
         score = float(tokens[0])
         label = int(float(tokens[1]))
         val_scores.append(score)
