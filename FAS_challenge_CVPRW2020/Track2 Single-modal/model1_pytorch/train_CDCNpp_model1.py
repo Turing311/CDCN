@@ -200,10 +200,11 @@ def train_test():
 
                 # log written
                 print('epoch:%d, mini-batch:%3d, lr=%f, Absolute_Depth_loss= %.4f, Contrastive_Depth_loss= %.4f' % (epoch + 1, i + 1, lr,  loss_absolute.avg, loss_contra.avg))
-                if i == 200:
-                    break
             #break            
-            
+
+            if i == 200:
+                break
+
         # whole epoch average
         print('epoch:%d, Train:  Absolute_Depth_loss= %.4f, Contrastive_Depth_loss= %.4f\n' % (epoch + 1, loss_absolute.avg, loss_contra.avg))
         log_file.write('epoch:%d, Train: Absolute_Depth_loss= %.4f, Contrastive_Depth_loss= %.4f \n' % (epoch + 1, loss_absolute.avg, loss_contra.avg))
@@ -243,6 +244,9 @@ def train_test():
                         map_score = 1.0
     
                     map_score_list.append('{} {}\n'.format( string_name[0], map_score ))
+
+                    if i == 100:
+                        break
                     
                 map_score_val_filename = args.log+'/'+ args.log+ '_map_score_val_%d.txt'% (epoch + 1)
                 with open(map_score_val_filename, 'w') as file:
