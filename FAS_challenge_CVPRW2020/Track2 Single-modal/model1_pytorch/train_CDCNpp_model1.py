@@ -27,7 +27,7 @@ import torch.optim as optim
 import copy
 import pdb
 
-from utils import AvgrageMeter, accuracy, performances
+from utils import AvgrageMeter, accuracy, performances_SiW_EER
 
 
 
@@ -161,8 +161,8 @@ def train_test():
         model.train()
         
         # load random 16-frame clip data every epoch
-        train_data = Spoofing_train(train_list, image_dir, transform=transforms.Compose([RandomErasing(), RandomHorizontalFlip(),  ToTensor(), Cutout(), Normaliztion()]))
-        dataloader_train = DataLoader(train_data, batch_size=args.batchsize, shuffle=True, num_workers=4)  # 
+        train_data = Spoofing_train(train_list, 'train', transform=transforms.Compose([RandomErasing(), RandomHorizontalFlip(),  ToTensor(), Cutout(), Normaliztion()]))
+        dataloader_train = DataLoader(train_data, batch_size=args.batchsize, shuffle=True)  # 
 
         for i, sample_batched in enumerate(dataloader_train):
             # get the inputs
@@ -219,39 +219,43 @@ def train_test():
                 '''                val             '''
                 ###########################################
                 # val for threshold
-                val_data = Spoofing_valtest(val_list, image_dir, transform=transforms.Compose([Normaliztion_valtest(), ToTensor_valtest()]))
+                val_data = Spoofing_train(val_list, 'valid', transform=transforms.Compose([Normaliztion(), ToTensor()]))
                 dataloader_val = DataLoader(val_data, batch_size=1, shuffle=False, num_workers=4)
                 
                 map_score_list = []
                 
                 for i, sample_batched in enumerate(dataloader_val):
                     # get the inputs
-                    inputs = sample_batched['image_x'].cuda()
-                    string_name, binary_mask = sample_batched['string_name'], sample_batched['binary_mask'].cuda()
+#                    inputs = sample_batched['image_x'].cuda()
+#                    string_name, binary_mask = sample_batched['string_name'], sample_batched['binary_mask'].cuda()
+
+                    inputs, binary_mask, spoof_label = sample_batched['image_x'].cuda(), sample_batched['binary_mask'].cuda(), sample_batched['spoofing_label'].cuda() 
         
-                    optimizer.zero_grad()
+                    optimizer.zero_grad()                    
                     
-                    
-                    map_score = 0.0
-                    for frame_t in range(inputs.shape[1]):
-                        map_x, embedding, x_Block1, x_Block2, x_Block3, x_input =  model(inputs[:,frame_t,:,:,:])
-                        score_norm = torch.sum(map_x)/torch.sum(binary_mask[:,frame_t,:,:])
-                        map_score += score_norm
-                    map_score = map_score/inputs.shape[1]
+                    map_x, embedding, x_Block1, x_Block2, x_Block3, x_input =  model(inputs)
+                    map_score = (torch.sum(map_x)/torch.sum(binary_mask)).item()
+
+                    print(map_x)
+                    print(binary_mask)
                     
                     if map_score>1:
                         map_score = 1.0
     
-                    map_score_list.append('{} {}\n'.format( string_name[0], map_score ))
+                    print('=============', map_score, spoof_label[0].item())
+                    map_score_list.append('{} {}\n'.format( map_score, spoof_label[0].item() ))
 
                     if i == 100:
                         break
                 
-                print('==========eval')
                 map_score_val_filename = args.log+'/'+ args.log+ '_map_score_val_%d.txt'% (epoch + 1)
                 with open(map_score_val_filename, 'w') as file:
                     file.writelines(map_score_list)                
                 
+                val_threshold, val_ACC, val_APCER, val_BPCER, val_ACER = performances_SiW_EER(map_score_val_filename)
+                print('epoch:%d, Val:  val_threshold= %.4f, val_ACC= %.4f, val_ACER= %.4f' % (epoch + 1, val_threshold, val_ACC, val_ACER))
+                log_file.write('\n epoch:%d, Val:  val_threshold= %.4f, val_ACC= %.4f, val_ACER= %.4f \n' % (epoch + 1, val_threshold, val_ACC, val_ACER))
+
 
             
             # save the model until the next improvement     

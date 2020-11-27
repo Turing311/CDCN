@@ -164,12 +164,14 @@ class ToTensor(object):
 
 class Spoofing_train(Dataset):
 
-    def __init__(self, info_list, root_dir,  transform=None):
+    def __init__(self, info_list, type,  transform=None):
 
 #        self.landmarks_frame = pd.read_csv(info_list, delimiter=' ', header=None)
-        self.root_dir = root_dir
         self.transform = transform
-        self.dataset = DataLmdb("/kaggle/working/Fake/train", db_size=87690, crop_size=128, flip=False, scale=1.0)
+        if type == 'train':
+            self.dataset = DataLmdb("/kaggle/working/Fake/train", db_size=87690, crop_size=128, flip=False, scale=1.0)
+        else:
+            self.dataset = DataLmdb("/kaggle/working/Fake/valid", db_size=28332, crop_size=128, flip=False, scale=1.0)
 
     def __len__(self):
         return len(self.dataset)

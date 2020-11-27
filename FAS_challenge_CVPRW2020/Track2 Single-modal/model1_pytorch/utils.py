@@ -256,7 +256,7 @@ def performances_SiW_EER(map_score_val_filename):
         count += 1
         tokens = line.split()
         score = float(tokens[0])
-        label = int(tokens[1])
+        label = int(float(tokens[1]))
         val_scores.append(score)
         val_labels.append(label)
         data.append({'map_score': score, 'label': label})
