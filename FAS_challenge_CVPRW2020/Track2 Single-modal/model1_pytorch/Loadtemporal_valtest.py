@@ -13,10 +13,16 @@ import pdb
 import math
 import os 
 from datalmdb import DataLmdb
+import imgaug.augmenters as iaa
 
 
 frames_total = 8    # each video 8 uniform samples
 
+# data augment from 'imgaug' --> Add (value=(-40,40), per_channel=True), GammaContrast (gamma=(0.5,1.5))
+seq = iaa.Sequential([
+    iaa.Add(value=(-40,40), per_channel=True), # Add color 
+    iaa.GammaContrast(gamma=(0.5,1.5)) # GammaContrast with a gamma of 0.5 to 1.5
+])
 
 class Normaliztion_valtest(object):
     """

@@ -146,7 +146,6 @@ def train_test():
     ACER_save = 1.0
     
     for epoch in range(args.epochs):  # loop over the dataset multiple times
-        scheduler.step()
         if (epoch + 1) % args.step_size == 0:
             lr *= args.gamma
 
@@ -204,7 +203,7 @@ def train_test():
 
             if i == 100:
                 break
-
+        scheduler.step()
         # whole epoch average
         print('epoch:%d, Train:  Absolute_Depth_loss= %.4f, Contrastive_Depth_loss= %.4f\n' % (epoch + 1, loss_absolute.avg, loss_contra.avg))
         log_file.write('epoch:%d, Train: Absolute_Depth_loss= %.4f, Contrastive_Depth_loss= %.4f \n' % (epoch + 1, loss_absolute.avg, loss_contra.avg))
@@ -212,7 +211,7 @@ def train_test():
            
             
         epoch_test = 1
-        if epoch>1 and epoch % epoch_test == epoch_test-1:    
+        if epoch>0 and epoch % epoch_test == epoch_test-1:    
             model.eval()
             
             with torch.no_grad():
