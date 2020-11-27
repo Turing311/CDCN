@@ -124,10 +124,9 @@ def train_test():
         print('train from scratch!\n')
         log_file.write('train from scratch!\n')
         log_file.flush()
-         
 
-        #model = CDCNpp( basic_conv=Conv2d_cd, theta=0.7)
-		model = CDCNpp( basic_conv=Conv2d_cd, theta=args.theta)
+#       model = CDCNpp( basic_conv=Conv2d_cd, theta=0.7)
+        model = CDCNpp( basic_conv=Conv2d_cd, theta=args.theta)
         
 
         model = model.cuda()
@@ -164,7 +163,7 @@ def train_test():
         
         # load random 16-frame clip data every epoch
         train_data = Spoofing_train(train_list, image_dir, transform=transforms.Compose([RandomErasing(), RandomHorizontalFlip(),  ToTensor(), Cutout(), Normaliztion()]))
-        dataloader_train = DataLoader(train_data, batch_size=args.batchsize, shuffle=True, num_workers=4)
+        dataloader_train = DataLoader(train_data, batch_size=args.batchsize, shuffle=True, num_workers=4)  # 
 
         for i, sample_batched in enumerate(dataloader_train):
             # get the inputs
@@ -211,7 +210,7 @@ def train_test():
            
             
         epoch_test = 1
-        if epoch>25 and epoch % epoch_test == epoch_test-1:    
+        if epoch>1 and epoch % epoch_test == epoch_test-1:    
             model.eval()
             
             with torch.no_grad():
@@ -272,7 +271,7 @@ if __name__ == "__main__":
     parser.add_argument('--epochs', type=int, default=60, help='total training epochs')
     parser.add_argument('--log', type=str, default="CDCNpp_BinaryMask_P1_07", help='log and save model name')
     parser.add_argument('--finetune', action='store_true', default=False, help='whether finetune other models')
-	parser.add_argument('--theta', type=float, default=0.7, help='hyper-parameters in CDCNpp')
+    parser.add_argument('--theta', type=float, default=0.7, help='hyper-parameters in CDCNpp')
 
     args = parser.parse_args()
     train_test()

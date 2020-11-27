@@ -54,67 +54,68 @@ class Spoofing_valtest(Dataset):
 
     def __init__(self, info_list, root_dir,  transform=None):
 
-        self.landmarks_frame = pd.read_csv(info_list, delimiter=' ', header=None)
+#        self.landmarks_frame = pd.read_csv(info_list, delimiter=' ', header=None)
         self.root_dir = root_dir
         self.transform = transform
+        self.dataset = DataLmdb("/kaggle/working/Fake/valid", db_size=28332, crop_size=128, flip=False, scale=1.0)
 
     def __len__(self):
-        return len(self.landmarks_frame)
+        return len(self.dataset)
 
     
     def __getitem__(self, idx):
+        #print(self.landmarks_frame.iloc[idx, 0])    
 
-        videoname = str(self.landmarks_frame.iloc[idx, 0])
-        image_path = os.path.join(self.root_dir, videoname)
-        image_path = os.path.join(image_path, 'profile')
-             
-        image_x, binary_mask = self.get_single_image_x(image_path, videoname)
-		    
-            
-        sample = {'image_x': image_x, 'binary_mask': binary_mask, 'string_name': videoname}
+        face, spoofing_label = self.dataset[idx]
+
+        image_x, binary_mask = self.get_single_image_x(face[0])
+
+        if spoofing_label == 1:
+            spoofing_label = 1            # real
+        else:
+            spoofing_label = 0            # fake
+            binary_mask = np.zeros((32, 32))    
+        
+        
+        #frequency_label = self.landmarks_frame.iloc[idx, 2:2+50].values  
+
+        sample = {'image_x': image_x, 'binary_mask': binary_mask, 'spoofing_label': spoofing_label}
 
         if self.transform:
             sample = self.transform(sample)
         return sample
 
-    def get_single_image_x(self, image_path, videoname):
+    def get_single_image_x(self, image_128):
+        
+        
+        image_x = np.zeros((256, 256, 3))
+        binary_mask = np.zeros((32, 32))
+ 
+        image_x_temp = np.zeros((128, 128, 3), dtype=np.uint8)
+        image_x_temp[:, :, 0] = image_128
+        image_x_temp[:, :, 1] = image_128
+        image_x_temp[:, :, 2] = image_128        
 
-        files_total = len([name for name in os.listdir(image_path) if os.path.isfile(os.path.join(image_path, name))])
-        interval = files_total//frames_total
-        
-        image_x = np.zeros((frames_total, 256, 256, 3))
-        
-        binary_mask = np.zeros((frames_total, 32, 32))
-        
-        
-        
-        # random choose 1 frame
-        for ii in range(frames_total):
-            image_id = ii*interval + 1 
-            
-            s = "%04d.jpg" % image_id            
-            
-            # RGB
-            image_path2 = os.path.join(image_path, s)
-            image_x_temp = cv2.imread(image_path2)
-            
-            image_x_temp_gray = cv2.imread(image_path2, 0)
-            image_x_temp_gray = cv2.resize(image_x_temp_gray, (32, 32))
+        image_x_temp_gray = cv2.cvtColor(image_x_temp, cv2.COLOR_BGR2GRAY)  # cv2.imread(image_path, 0)
 
-            image_x[ii,:,:,:] = cv2.resize(image_x_temp, (256, 256))
-            
-            #print(image_path2)
-            
-            for i in range(32):
-                for j in range(32):
-                    if image_x_temp_gray[i,j]>0:
-                        binary_mask[ii, i, j]=1.0
-                    else:
-                        binary_mask[ii, i, j]=0.0
-            
+        image_x = cv2.resize(image_x_temp, (256, 256))
+        image_x_temp_gray = cv2.resize(image_x_temp_gray, (32, 32))
 
+        image_x_aug = seq.augment_image(image_x) 
         
-        return image_x, binary_mask
+             
+        
+        for i in range(32):
+            for j in range(32):
+                if image_x_temp_gray[i,j]>0:
+                    binary_mask[i,j]=1
+                else:
+                    binary_mask[i,j]=0
+        
+        
+        
+   
+        return image_x_aug, binary_mask
 
 
 

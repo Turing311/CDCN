@@ -13,7 +13,7 @@ import pdb
 import math
 import os 
 import imgaug.augmenters as iaa
-
+from datalmdb import DataLmdb
 
  
 
@@ -166,25 +166,22 @@ class Spoofing_train(Dataset):
 
     def __init__(self, info_list, root_dir,  transform=None):
 
-        self.landmarks_frame = pd.read_csv(info_list, delimiter=' ', header=None)
+#        self.landmarks_frame = pd.read_csv(info_list, delimiter=' ', header=None)
         self.root_dir = root_dir
         self.transform = transform
+        self.dataset = DataLmdb("/kaggle/working/Fake/train", db_size=87690, crop_size=128, flip=False, scale=1.0)
 
     def __len__(self):
-        return len(self.landmarks_frame)
+        return len(self.dataset)
 
     
     def __getitem__(self, idx):
-        #print(self.landmarks_frame.iloc[idx, 0])
-        videoname = str(self.landmarks_frame.iloc[idx, 0])
-        image_path = os.path.join(self.root_dir, videoname)
-    
-             
-        image_x, binary_mask = self.get_single_image_x(image_path)
-        
-        
-		    
-        spoofing_label = self.landmarks_frame.iloc[idx, 1]
+        #print(self.landmarks_frame.iloc[idx, 0])    
+
+        face, spoofing_label = self.dataset[idx]
+
+        image_x, binary_mask = self.get_single_image_x(face[0])
+
         if spoofing_label == 1:
             spoofing_label = 1            # real
         else:
@@ -200,19 +197,22 @@ class Spoofing_train(Dataset):
             sample = self.transform(sample)
         return sample
 
-    def get_single_image_x(self, image_path):
+    def get_single_image_x(self, image_128):
         
         
         image_x = np.zeros((256, 256, 3))
         binary_mask = np.zeros((32, 32))
  
- 
-        image_x_temp = cv2.imread(image_path)
-        image_x_temp_gray = cv2.imread(image_path, 0)
+        image_x_temp = np.zeros((128, 128, 3), dtype=np.uint8)
+        image_x_temp[:, :, 0] = image_128
+        image_x_temp[:, :, 1] = image_128
+        image_x_temp[:, :, 2] = image_128        
 
+        image_x_temp_gray = cv2.cvtColor(image_x_temp, cv2.COLOR_BGR2GRAY)  # cv2.imread(image_path, 0)
 
         image_x = cv2.resize(image_x_temp, (256, 256))
         image_x_temp_gray = cv2.resize(image_x_temp_gray, (32, 32))
+
         image_x_aug = seq.augment_image(image_x) 
         
              
