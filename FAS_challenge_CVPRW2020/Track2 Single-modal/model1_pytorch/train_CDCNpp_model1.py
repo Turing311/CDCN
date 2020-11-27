@@ -1,7 +1,7 @@
 from __future__ import print_function, division
 import torch
-import matplotlib as mpl
-mpl.use('TkAgg')
+#import matplotlib as mpl
+#mpl.use('TkAgg')
 import argparse,os
 import pandas as pd
 import cv2
