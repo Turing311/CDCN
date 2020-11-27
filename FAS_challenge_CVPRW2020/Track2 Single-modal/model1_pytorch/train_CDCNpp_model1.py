@@ -201,8 +201,6 @@ def train_test():
                 print('epoch:%d, mini-batch:%3d, lr=%f, Absolute_Depth_loss= %.4f, Contrastive_Depth_loss= %.4f' % (epoch + 1, i + 1, lr,  loss_absolute.avg, loss_contra.avg))
             #break            
 
-            if i == 100:
-                break
         scheduler.step()
         # whole epoch average
         print('epoch:%d, Train:  Absolute_Depth_loss= %.4f, Contrastive_Depth_loss= %.4f\n' % (epoch + 1, loss_absolute.avg, loss_contra.avg))
@@ -211,7 +209,7 @@ def train_test():
            
             
         epoch_test = 1
-        if epoch>0 and epoch % epoch_test == epoch_test-1:    
+        if epoch>25 and epoch % epoch_test == epoch_test-1:    
             model.eval()
             
             with torch.no_grad():
@@ -235,18 +233,11 @@ def train_test():
                     
                     map_x, embedding, x_Block1, x_Block2, x_Block3, x_input =  model(inputs)
                     map_score = (torch.sum(map_x)/torch.sum(binary_mask)).item()
-
-                    print(map_x)
-                    print(binary_mask)
                     
                     if map_score>1:
                         map_score = 1.0
     
-                    print('=============', map_score, spoof_label[0].item())
                     map_score_list.append('{} {}\n'.format( map_score, spoof_label[0].item() ))
-
-                    if i == 100:
-                        break
                 
                 map_score_val_filename = args.log+'/'+ args.log+ '_map_score_val_%d.txt'% (epoch + 1)
                 with open(map_score_val_filename, 'w') as file:
