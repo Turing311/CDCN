@@ -128,7 +128,7 @@ def train_test():
 #       model = CDCNpp( basic_conv=Conv2d_cd, theta=0.7)
         model = CDCNpp( basic_conv=Conv2d_cd, theta=args.theta)
         
-        model.load_state_dict('./models/CDCNpp_BinaryMask_P1_07_5.pkl')
+        model.load_state_dict(torch.load('./models/CDCNpp_BinaryMask_P1_07_5.pkl'))
         model = model.cuda()
 
         lr = args.lr
