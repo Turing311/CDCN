@@ -202,7 +202,7 @@ def train_test():
                 print('epoch:%d, mini-batch:%3d, lr=%f, Absolute_Depth_loss= %.4f, Contrastive_Depth_loss= %.4f' % (epoch + 1, i + 1, lr,  loss_absolute.avg, loss_contra.avg))
             #break            
 
-            if i == 200:
+            if i == 100:
                 break
 
         # whole epoch average
@@ -247,7 +247,8 @@ def train_test():
 
                     if i == 100:
                         break
-                    
+                
+                print('==========eval')
                 map_score_val_filename = args.log+'/'+ args.log+ '_map_score_val_%d.txt'% (epoch + 1)
                 with open(map_score_val_filename, 'w') as file:
                     file.writelines(map_score_list)                
