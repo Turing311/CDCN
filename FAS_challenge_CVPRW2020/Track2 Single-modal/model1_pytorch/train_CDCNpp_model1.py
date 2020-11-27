@@ -200,7 +200,8 @@ def train_test():
 
                 # log written
                 print('epoch:%d, mini-batch:%3d, lr=%f, Absolute_Depth_loss= %.4f, Contrastive_Depth_loss= %.4f' % (epoch + 1, i + 1, lr,  loss_absolute.avg, loss_contra.avg))
-        
+                if i == 200:
+                    break
             #break            
             
         # whole epoch average
