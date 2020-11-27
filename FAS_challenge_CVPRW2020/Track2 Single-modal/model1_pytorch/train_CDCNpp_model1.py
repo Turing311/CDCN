@@ -209,7 +209,7 @@ def train_test():
            
             
         epoch_test = 1
-        if epoch>25 and epoch % epoch_test == epoch_test-1:    
+        if epoch>1 and epoch % epoch_test == epoch_test-1:    
             model.eval()
             
             with torch.no_grad():
