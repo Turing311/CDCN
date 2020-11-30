@@ -263,7 +263,7 @@ def train_test():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="save quality using landmarkpose model")
     parser.add_argument('--gpu', type=int, default=3, help='the gpu id used for predict')
-    parser.add_argument('--lr', type=float, default=0.000005, help='initial learning rate')  #default=0.0001
+    parser.add_argument('--lr', type=float, default=0.000003, help='initial learning rate')  #default=0.0001
     parser.add_argument('--batchsize', type=int, default=9, help='initial batchsize')  #default=7  
     parser.add_argument('--step_size', type=int, default=20, help='how many epochs lr decays once')  # 500  | DPC = 400
     parser.add_argument('--gamma', type=float, default=0.5, help='gamma of optim.lr_scheduler.StepLR, decay of lr')
